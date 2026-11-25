@@ -21,6 +21,7 @@ temp/
 # Build artifacts
 bin/
 obj/
+target/
 dist/
 build/
 node_modules/
