@@ -48,6 +48,37 @@ body {
     overflow: hidden;
 }
 
+/* FR-7: навигация между страницами */
+.site-nav {
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    align-self: center;
+}
+
+.site-nav a {
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .15s, color .15s;
+}
+
+.site-nav a:hover {
+    background: #f0f3f8;
+    color: var(--text);
+}
+
+.site-nav a.is-active {
+    background: var(--primary);
+    color: #fff;
+}
+
 .card__header {
     padding: 20px 20px 12px;
 }
@@ -83,6 +114,11 @@ body {
     max-height: 200px;
 }
 
+/* FR-3: список всех товаров — высокая прокручиваемая область */
+.table-wrap--tall {
+    max-height: 560px;
+}
+
 .entry-table {
     width: 100%;
     border-collapse: separate;
@@ -108,6 +144,29 @@ body {
 .entry-table th.col-qty,
 .entry-table td.col-qty {
     width: 140px;
+}
+
+/* Список товаров: идентификатор и дата */
+.entry-table th.col-id,
+.entry-table td.col-id {
+    width: 70px;
+    text-align: right;
+}
+
+.entry-table td.col-id {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.entry-table th.col-date,
+.entry-table td.col-date {
+    width: 170px;
+}
+
+.entry-table td.col-date {
+    color: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
 
 .entry-table tbody tr:nth-child(even) {
@@ -182,6 +241,20 @@ body {
     text-align: center;
 }
 
+.empty a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.empty--error {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.card__footer--end {
+    justify-content: flex-end;
+}
+
 .card__footer {
     display: flex;
     align-items: center;
@@ -189,6 +262,12 @@ body {
     gap: 12px;
     padding: 14px 20px;
     background: #fbfcfe;
+}
+
+/* Атрибут hidden должен побеждать display: flex выше */
+.card__footer[hidden],
+[hidden] {
+    display: none !important;
 }
 
 .status {
@@ -240,6 +319,16 @@ body {
     .entry-table th.col-qty,
     .entry-table td.col-qty {
         width: 96px;
+    }
+
+    .entry-table th.col-date,
+    .entry-table td.col-date {
+        width: 120px;
+    }
+
+    .entry-table th.col-id,
+    .entry-table td.col-id {
+        width: 52px;
     }
 
     .card__footer {

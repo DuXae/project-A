@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Все товары — project-A</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<main class="page">
+    <nav class="site-nav" aria-label="Основная навигация">
+        <a href="/">Ввод товаров</a>
+        <a href="/products.html" class="is-active" aria-current="page">Все товары</a>
+    </nav>
+
+    <section class="card" aria-labelledby="list-title">
+        <header class="card__header">
+            <h1 id="list-title">Товары в базе</h1>
+            <p class="card__hint" id="meta">Загрузка…</p>
+        </header>
+
+        <div class="table-wrap table-wrap--tall" id="table-wrap">
+            <table class="entry-table entry-table--readonly">
+                <thead>
+                <tr>
+                    <th scope="col" class="col-id">ID</th>
+                    <th scope="col">Товар</th>
+                    <th scope="col" class="col-qty">Количество</th>
+                    <th scope="col" class="col-date">Дата добавления</th>
+                </tr>
+                </thead>
+                <tbody id="rows">
+                <tr><td colspan="4" class="empty">Загрузка…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="card__footer card__footer--end" id="footer" hidden>
+            <button type="button" class="btn btn--primary" id="retry">Повторить</button>
+        </footer>
+    </section>
+</main>
+<script src="/js/products.js" defer></script>
+</body>
+</html>

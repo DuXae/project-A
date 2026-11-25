@@ -36,7 +36,7 @@ public class ProductController {
 
     @GetMapping
     public PageResponse<ProductResponse> list(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 20, sort = {"createdAt", "id"}, direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
         return PageResponse.from(productService.findAll(pageable), ProductResponse::from);

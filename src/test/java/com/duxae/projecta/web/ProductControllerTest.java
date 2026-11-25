@@ -4,23 +4,29 @@ import com.duxae.projecta.domain.Product;
 import com.duxae.projecta.service.ProductService;
 import com.duxae.projecta.web.error.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -141,5 +147,47 @@ class ProductControllerTest {
     void indexPageIsServed() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void productsPageIsServed() throws Exception {
+        mockMvc.perform(get("/products.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
+    }
+
+    @Test
+    void sizeAboveDefaultLimitIsAccepted() throws Exception {
+        when(productService.findAll(any())).thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 10_000), 0));
+
+        mockMvc.perform(get("/api/v1/products").param("size", "10000"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(productService).findAll(captor.capture());
+        assertThat(captor.getValue().getPageSize()).isEqualTo(10_000);
+    }
+
+    /**
+     * Записи, сохранённые одной пачкой, имеют одинаковый createdAt.
+     * Без вторичной сортировки по id порядок в списке непредсказуем.
+     */
+    @Test
+    void defaultSortIsStable() throws Exception {
+        when(productService.findAll(any())).thenReturn(new PageImpl<>(List.of()));
+
+        mockMvc.perform(get("/api/v1/products"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(productService).findAll(captor.capture());
+
+        Sort.Order createdAt = captor.getValue().getSort().getOrderFor("createdAt");
+        Sort.Order id = captor.getValue().getSort().getOrderFor("id");
+
+        assertThat(createdAt).isNotNull();
+        assertThat(createdAt.getDirection()).isEqualTo(Sort.Direction.DESC);
+        assertThat(id).as("stable tiebreaker by id").isNotNull();
+        assertThat(id.getDirection()).isEqualTo(Sort.Direction.DESC);
     }
 }
