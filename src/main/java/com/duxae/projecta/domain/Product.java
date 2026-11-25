@@ -30,6 +30,12 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /**
+     * Мягкое удаление (FR-6): NULL — запись активна.
+     */
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     protected Product() {
         // для JPA
     }
@@ -42,6 +48,19 @@ public class Product {
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();
+    }
+
+    /**
+     * Помечает запись удалённой. Повторный вызов дату не меняет.
+     */
+    public void markDeleted() {
+        if (this.deletedAt == null) {
+            this.deletedAt = Instant.now();
+        }
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
     }
 
     public Long getId() {
@@ -66,5 +85,9 @@ public class Product {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
     }
 }

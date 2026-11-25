@@ -169,6 +169,126 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+/* Страница удаления: чекбоксы и кнопка в строке */
+.entry-table th.col-check,
+.entry-table td.col-check {
+    width: 44px;
+    text-align: center;
+}
+
+.entry-table th.col-action,
+.entry-table td.col-action {
+    width: 110px;
+    text-align: right;
+}
+
+.entry-table--readonly td.col-check,
+.entry-table--readonly td.col-action {
+    padding: 6px 12px;
+}
+
+.entry-table td.col-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--danger);
+}
+
+.entry-table th.col-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--danger);
+}
+
+.entry-table tbody tr:has(.row-check:checked) {
+    background: #fff5f4;
+}
+
+.btn--small {
+    padding: 5px 12px;
+    font-size: 13px;
+}
+
+.btn--danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+    background: #b62a22;
+}
+
+.btn--ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.btn--ghost:hover:not(:disabled) {
+    background: #f0f3f8;
+}
+
+/* FR-5: модальный диалог подтверждения */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 30, 50, .45);
+}
+
+.modal__dialog {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    padding: 22px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(20, 30, 50, .22);
+}
+
+.modal__title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 650;
+}
+
+.modal__text {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.modal__list {
+    flex: 1;
+    overflow-y: auto;
+    margin: 0 0 18px;
+    padding: 0 0 0 20px;
+    font-size: 14px;
+}
+
+.modal__list li {
+    margin-bottom: 4px;
+}
+
+.modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
 .entry-table tbody tr:nth-child(even) {
     background: #fbfcfe;
 }

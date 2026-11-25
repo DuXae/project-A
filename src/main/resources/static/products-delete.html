@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Удаление товаров — project-A</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<main class="page">
+    <nav class="site-nav" aria-label="Основная навигация">
+        <a href="/">Ввод товаров</a>
+        <a href="/products.html">Все товары</a>
+        <a href="/products-delete.html" class="is-active" aria-current="page">Удаление</a>
+    </nav>
+
+    <section class="card" aria-labelledby="delete-title">
+        <header class="card__header">
+            <h1 id="delete-title">Удаление товаров</h1>
+            <p class="card__hint" id="meta">Загрузка…</p>
+        </header>
+
+        <div class="table-wrap table-wrap--tall" id="table-wrap">
+            <table class="entry-table entry-table--readonly">
+                <thead>
+                <tr>
+                    <th scope="col" class="col-check">
+                        <input type="checkbox" id="select-all" aria-label="Выбрать все товары">
+                    </th>
+                    <th scope="col" class="col-id">ID</th>
+                    <th scope="col">Товар</th>
+                    <th scope="col" class="col-qty">Количество</th>
+                    <th scope="col" class="col-date">Дата добавления</th>
+                    <th scope="col" class="col-action">Действие</th>
+                </tr>
+                </thead>
+                <tbody id="rows">
+                <tr><td colspan="6" class="empty">Загрузка…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="card__footer">
+            <span class="status" id="status" role="status" aria-live="polite"></span>
+            <button type="button" class="btn btn--danger" id="delete-selected" disabled>
+                Удалить выбранные
+            </button>
+        </footer>
+    </section>
+</main>
+
+<!-- FR-5: подтверждение со списком удаляемых товаров -->
+<div class="modal" id="confirm-modal" hidden>
+    <div class="modal__backdrop" data-close="true"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <h2 class="modal__title" id="confirm-title">Удалить товары?</h2>
+        <p class="modal__text">
+            Записи будут скрыты из списков. Данные остаются в базе и могут быть восстановлены.
+        </p>
+        <ul class="modal__list" id="confirm-list"></ul>
+        <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" id="confirm-cancel">Отмена</button>
+            <button type="button" class="btn btn--danger" id="confirm-ok">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/products-delete.js" defer></script>
+</body>
+</html>

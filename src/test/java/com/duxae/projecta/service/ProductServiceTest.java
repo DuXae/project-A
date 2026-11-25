@@ -13,9 +13,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,15 +53,65 @@ class ProductServiceTest {
         assertThat(productService.saveAll(List.of())).isEmpty();
     }
 
+    /**
+     * FR-7: список строится только по активным записям.
+     */
     @Test
-    void findAllDelegatesToRepository() {
+    void findAllUsesActiveOnlyQuery() {
         Pageable pageable = PageRequest.of(0, 20);
-        when(productRepository.findAll(pageable))
+        when(productRepository.findAllByDeletedAtIsNull(pageable))
                 .thenReturn(new PageImpl<>(List.of(new Product("Товар", 1))));
 
         Page<Product> page = productService.findAll(pageable);
 
         assertThat(page.getTotalElements()).isEqualTo(1);
-        verify(productRepository).findAll(pageable);
+        verify(productRepository).findAllByDeletedAtIsNull(pageable);
+        verify(productRepository, never()).findAll(pageable);
+    }
+
+    @Test
+    void softDeleteMarksEntityAndSaves() {
+        Product product = new Product("Молоток", 3);
+        when(productRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(product)).thenReturn(product);
+
+        productService.softDelete(1L);
+
+        assertThat(product.isDeleted()).isTrue();
+        assertThat(product.getDeletedAt()).isNotNull();
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    void softDeleteThrowsForMissingOrAlreadyDeleted() {
+        when(productRepository.findByIdAndDeletedAtIsNull(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> productService.softDelete(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("99");
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test
+    void softDeleteAllMarksOnlyFoundEntities() {
+        Product a = new Product("A", 1);
+        Product b = new Product("B", 2);
+        when(productRepository.findAllByIdInAndDeletedAtIsNull(List.of(1L, 2L, 3L)))
+                .thenReturn(List.of(a, b));
+        when(productRepository.saveAll(List.of(a, b))).thenReturn(List.of(a, b));
+
+        int deleted = productService.softDeleteAll(List.of(1L, 2L, 3L));
+
+        assertThat(deleted).isEqualTo(2);
+        assertThat(a.isDeleted()).isTrue();
+        assertThat(b.isDeleted()).isTrue();
+    }
+
+    @Test
+    void softDeleteAllWithNoMatchesReturnsZero() {
+        when(productRepository.findAllByIdInAndDeletedAtIsNull(anyCollection())).thenReturn(List.of());
+
+        assertThat(productService.softDeleteAll(List.of(7L, 8L))).isZero();
+        verify(productRepository).saveAll(List.of());
     }
 }

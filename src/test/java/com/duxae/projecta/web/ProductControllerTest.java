@@ -2,6 +2,7 @@ package com.duxae.projecta.web;
 
 import com.duxae.projecta.domain.Product;
 import com.duxae.projecta.service.ProductService;
+import com.duxae.projecta.service.ResourceNotFoundException;
 import com.duxae.projecta.web.error.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,8 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -147,6 +150,68 @@ class ProductControllerTest {
     void indexPageIsServed() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteReturns204() throws Exception {
+        mockMvc.perform(delete("/api/v1/products/5"))
+                .andExpect(status().isNoContent());
+
+        verify(productService).softDelete(5L);
+    }
+
+    @Test
+    void deleteReturns404ForMissingProduct() throws Exception {
+        doThrow(new ResourceNotFoundException("Product", 5L)).when(productService).softDelete(5L);
+
+        mockMvc.perform(delete("/api/v1/products/5"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value(containsString("5")));
+    }
+
+    @Test
+    void bulkDeleteReturnsCount() throws Exception {
+        when(productService.softDeleteAll(List.of(1L, 2L))).thenReturn(2);
+
+        mockMvc.perform(post("/api/v1/products/bulk-delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"ids":[1,2]}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted").value(2));
+    }
+
+    @Test
+    void bulkDeleteReturnsZeroWhenNothingMatched() throws Exception {
+        when(productService.softDeleteAll(List.of(9L))).thenReturn(0);
+
+        mockMvc.perform(post("/api/v1/products/bulk-delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"ids":[9]}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted").value(0));
+    }
+
+    @Test
+    void bulkDeleteRejectsEmptyIds() throws Exception {
+        mockMvc.perform(post("/api/v1/products/bulk-delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"ids":[]}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+    }
+
+    @Test
+    void deletePageIsServed() throws Exception {
+        mockMvc.perform(get("/products-delete.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
     }
 
     @Test
